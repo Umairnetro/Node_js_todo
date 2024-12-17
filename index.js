@@ -44,9 +44,26 @@ app.post("/login", (req, res) => {
   if (validationError) return res.status(400).send(validationError);
 
   const { username, password } = req.body;
+
+  const users = readJSON("userinfo.json");
+  let user = users.find((u) => {
+    return u.username === username;
+  });
+
+  console.log({ user });
+
+  if (!user || user.password !== password) {
+    return res.status(401).send({
+      message: "Invalid username or password.",
+    });
+  }
+
   res.status(200).send({
-    message:"Login Successful"
-  })
+    message: "Login Successful",
+    username,
+    password,
+    user,
+  });
 });
 
 app.listen(port, () => {
