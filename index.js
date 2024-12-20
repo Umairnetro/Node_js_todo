@@ -9,7 +9,7 @@ const {
   validate,
 } = require("./helpers/validation");
 const { readJSON, writeJSON } = require("./helpers/fileOps");
-const { generateToken } = require("./helpers/auth");
+const { generateToken, verifyToken } = require("./helpers/auth");
 
 const port = 3000;
 const app = express();
@@ -47,7 +47,7 @@ app.post("/login", (req, res) => {
 
   const { username, password } = req.body;
 
-  const users = readJSON("userinfo.json");
+  const users = readJSON("userInfo.json");
   let user = users.find((u) => {
     return u.username === username;
   });
@@ -60,27 +60,32 @@ app.post("/login", (req, res) => {
 
   const token = generateToken(user.username, user.id);
   res.json({ token });
-
-  res.status(200).send({
-    message: "Login Successful",
-  });
 });
 
-app.post("/todo", (req, res) => {
+// Get todos
+app.get("/todos", (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader;
+
+  if (!token) return res.status(401).send("Access denied.");
+
+  const user = verifyToken(token);
+  if (!user) return res.status(403).send("Invalid token.");
+
+  const todos = readJSON("todo.json");
+  res.json(todos.filter((todo) => todo.username === user.username));
+});
+
+// Add todos
+app.post("/todos", (req, res) => {
   const validationError = validate(req.body, taskSchema);
   if (validationError) return res.status(400).send(validationError);
 
   const { task } = req.body;
-
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
 
-  // debugging
-  res.send({
-    message:"error",
-     
-  })
-  
+  const token = authHeader;
+
   if (!token) return res.status(401).send("Access denied.");
 
   const user = verifyToken(token);

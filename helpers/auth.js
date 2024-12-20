@@ -4,7 +4,7 @@ const SECRET_KEY = "-sdffsdjawd465cVJHFHBNGG^%^&:'>?*-e67187efc6bb";
 
 // Generate JWT token
 const generateToken = (username, userId) => {
-  return jwt.sign({ username, id: userId }, SECRET_KEY, { expiresIn: "1h" });
+  return jwt.sign({ username, id: userId }, SECRET_KEY, { expiresIn: "2d" });
 };
 
 // Verify JWT Token
