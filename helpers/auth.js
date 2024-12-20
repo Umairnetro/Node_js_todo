@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = "your_secret_key";
+const SECRET_KEY = "-sdffsdjawd465cVJHFHBNGG^%^&:'>?*-e67187efc6bb";
 
 // Generate JWT token
 const generateToken = (username, userId) => {
@@ -16,4 +16,4 @@ const verifyToken = (token) => {
   }
 };
 
-module.exports = {generateToken, verifyToken}
+module.exports = { generateToken, verifyToken };

@@ -5,9 +5,11 @@ const { v4: uuidv4 } = require("uuid");
 const {
   registerSchema,
   loginSchema,
+  taskSchema,
   validate,
 } = require("./helpers/validation");
 const { readJSON, writeJSON } = require("./helpers/fileOps");
+const { generateToken } = require("./helpers/auth");
 
 const port = 3000;
 const app = express();
@@ -50,20 +52,46 @@ app.post("/login", (req, res) => {
     return u.username === username;
   });
 
-  console.log({ user });
-
   if (!user || user.password !== password) {
     return res.status(401).send({
       message: "Invalid username or password.",
     });
   }
 
+  const token = generateToken(user.username, user.id);
+  res.json({ token });
+
   res.status(200).send({
     message: "Login Successful",
-    username,
-    password,
-    user,
   });
+});
+
+app.post("/todo", (req, res) => {
+  const validationError = validate(req.body, taskSchema);
+  if (validationError) return res.status(400).send(validationError);
+
+  const { task } = req.body;
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  // debugging
+  res.send({
+    message:"error",
+     
+  })
+  
+  if (!token) return res.status(401).send("Access denied.");
+
+  const user = verifyToken(token);
+  if (!user) return res.status(403).send("Invalid token.");
+
+  const todos = readJSON("todo.json");
+  const newTask = { id: uuidv4(), username: user.username, task };
+  todos.push(newTask);
+  writeJSON("todo.json", todos);
+
+  res.status(201).send("Task added successfully.");
 });
 
 app.listen(port, () => {

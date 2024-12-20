@@ -12,9 +12,12 @@ const loginSchema = joi.object({
   password: joi.string().required(),
 });
 
+const taskSchema = joi.object({
+  task: joi.string().min(1).required(),
+});
 const validate = (data, schema) => {
   const { error } = schema.validate(data);
   return error ? error.details[0].message : "";
 };
 
-module.exports = { registerSchema, loginSchema, validate };
+module.exports = { registerSchema, loginSchema, taskSchema, validate };
